@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { title, description, date, registrationEndDate, venue, fee, coverImage } = body;
 
-    if (!title || !description || !date || !registrationEndDate || !venue || fee == null || !coverImage) {
+    if (!title || !description || !date || !registrationEndDate || !venue || fee == null) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 

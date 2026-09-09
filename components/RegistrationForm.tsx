@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { UploadButton } from "@/lib/uploadthing";
 
-export default function RegistrationForm({ eventId }: { eventId: string }) {
+export default function RegistrationForm({ eventId, upiQrCode }: { eventId: string; upiQrCode?: string }) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -111,6 +111,13 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
           Please make the payment via UPI and upload the screenshot. 
           <br/><strong className="text-primary">While making payment don't forget to copy the transaction ID from your UPI app.</strong>
         </p>
+
+        {upiQrCode && (
+          <div className="mb-6 flex flex-col items-center p-4 bg-background border border-primary/20 rounded-md">
+            <p className="text-sm font-medium mb-3">Scan to Pay</p>
+            <img src={upiQrCode} alt="UPI QR Code" className="h-48 w-48 object-contain rounded-md bg-white p-2 border border-accent shadow-sm" />
+          </div>
+        )}
 
         <div className="mb-5">
           <label className="block text-sm font-medium text-foreground mb-1">UPI Transaction ID</label>

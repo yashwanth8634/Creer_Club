@@ -102,7 +102,7 @@ export default async function EventDetailPage({
             ) : (
               <div className="bg-background border-t border-accent pt-6 mt-6">
                 <h3 className="text-xl font-serif font-bold text-primary mb-4">Register Now</h3>
-                <RegistrationForm eventId={id} />
+                <RegistrationForm eventId={id} upiQrCode={event.upiQrCode} />
               </div>
             )}
           </div>
