@@ -29,7 +29,6 @@ export default function AdminRegistrationRow({
   reg: Registration;
   onUpdate: () => void;
 }) {
-  const [showModal, setShowModal] = useState(false);
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +43,6 @@ export default function AdminRegistrationRow({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, rejectionReason }),
       });
-      setShowModal(false);
       setShowRejectInput(false);
       setRejectionReason("");
       onUpdate();
@@ -72,7 +70,7 @@ export default function AdminRegistrationRow({
           {reg.screenshotUrl ? (
             <button
               onClick={() => setScreenshotOpen(true)}
-              className="w-12 h-12 rounded-sm overflow-hidden border border-accent hover:border-primary transition-colors block"
+              className="w-12 h-12 rounded-md overflow-hidden border border-accent hover:border-primary transition-colors block cursor-pointer"
             >
               <img src={reg.screenshotUrl} alt="Screenshot" className="w-full h-full object-cover" />
             </button>
@@ -86,14 +84,14 @@ export default function AdminRegistrationRow({
               <button
                 onClick={() => handleAction("approve")}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-sm hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 Approve
               </button>
               <button
                 onClick={() => setShowRejectInput(true)}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-sm hover:bg-red-600 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 Reject
               </button>
@@ -115,18 +113,18 @@ export default function AdminRegistrationRow({
                 placeholder="Reason for rejection (required)"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                className="flex-1 px-3 py-2 border border-red-200 rounded-sm text-sm focus:outline-none focus:border-red-400 bg-white"
+                className="flex-1 px-3 py-2 border border-red-200 rounded-md text-sm focus:outline-none focus:border-red-400 bg-white cursor-text"
               />
               <button
                 onClick={() => handleAction("reject")}
                 disabled={isLoading || !rejectionReason.trim()}
-                className="px-4 py-2 bg-red-500 text-white text-xs font-medium rounded-sm hover:bg-red-600 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 Confirm Reject
               </button>
               <button
                 onClick={() => { setShowRejectInput(false); setRejectionReason(""); }}
-                className="px-4 py-2 bg-accent text-foreground text-xs font-medium rounded-sm hover:bg-accent/70 transition-colors"
+                className="px-4 py-2 bg-accent text-foreground text-xs font-medium rounded-md hover:bg-accent/70 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -140,14 +138,14 @@ export default function AdminRegistrationRow({
         <tr>
           <td colSpan={8}>
             <div
-              className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 cursor-pointer"
               onClick={() => setScreenshotOpen(false)}
             >
-              <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="relative max-w-lg w-full cursor-default" onClick={(e) => e.stopPropagation()}>
                 <img src={reg.screenshotUrl} alt="Payment Screenshot" className="w-full rounded-xl shadow-2xl" />
                 <button
                   onClick={() => setScreenshotOpen(false)}
-                  className="absolute top-2 right-2 bg-white text-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm shadow"
+                  className="absolute top-2 right-2 bg-white text-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm shadow cursor-pointer hover:bg-accent/50 transition-colors"
                 >
                   ✕
                 </button>

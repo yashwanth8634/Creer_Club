@@ -57,7 +57,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
 
   if (success) {
     return (
-      <div className="bg-primary/10 border border-primary text-primary p-6 rounded-sm text-center">
+      <div className="bg-primary/10 border border-primary text-primary p-6 rounded-md text-center">
         <h3 className="text-xl font-serif font-bold mb-2">Registration Submitted!</h3>
         <p className="text-foreground/80">Your registration is pending verification. We will notify you via email once approved.</p>
       </div>
@@ -66,7 +66,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && <div className="bg-red-50 text-red-600 p-3 rounded-sm text-sm border border-red-200">{error}</div>}
+      {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">{error}</div>}
       
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
@@ -76,7 +76,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-accent rounded-sm focus:outline-none focus:border-primary bg-background"
+          className="w-full px-4 py-2 border border-accent rounded-md focus:outline-none focus:border-primary bg-background cursor-text"
         />
       </div>
 
@@ -89,7 +89,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-accent rounded-sm focus:outline-none focus:border-primary bg-background"
+            className="w-full px-4 py-2 border border-accent rounded-md focus:outline-none focus:border-primary bg-background cursor-text"
           />
         </div>
         <div>
@@ -100,12 +100,12 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-accent rounded-sm focus:outline-none focus:border-primary bg-background"
+            className="w-full px-4 py-2 border border-accent rounded-md focus:outline-none focus:border-primary bg-background cursor-text"
           />
         </div>
       </div>
 
-      <div className="bg-accent/20 p-5 rounded-sm border border-accent">
+      <div className="bg-accent/20 p-5 rounded-md border border-accent">
         <h4 className="font-semibold text-primary mb-2">Payment Details</h4>
         <p className="text-sm text-foreground/80 mb-4">
           Please make the payment via UPI and upload the screenshot. 
@@ -121,7 +121,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
             value={formData.transactionId}
             onChange={handleChange}
             placeholder="e.g. 123456789012"
-            className="w-full px-4 py-2 border border-accent rounded-sm focus:outline-none focus:border-primary bg-background"
+            className="w-full px-4 py-2 border border-accent rounded-md focus:outline-none focus:border-primary bg-background cursor-text"
           />
         </div>
 
@@ -129,17 +129,17 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
           <label className="block text-sm font-medium text-foreground mb-2">Payment Screenshot</label>
           {screenshotUrl ? (
             <div className="relative inline-block">
-              <img src={screenshotUrl} alt="Screenshot" className="h-32 object-contain rounded-sm border border-accent" />
+              <img src={screenshotUrl} alt="Screenshot" className="h-32 object-contain rounded-md border border-accent" />
               <button 
                 type="button"
                 onClick={() => { setScreenshotUrl(""); setScreenshotKey(""); }}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 cursor-pointer"
               >
                 ✕
               </button>
             </div>
           ) : (
-            <div className="border-2 border-dashed border-accent p-4 text-center rounded-sm bg-background">
+            <div className="border-2 border-dashed border-accent p-4 text-center rounded-md bg-background cursor-pointer">
               <UploadButton
                 endpoint="imageUploader"
                 onClientUploadComplete={(res) => {
@@ -160,7 +160,7 @@ export default function RegistrationForm({ eventId }: { eventId: string }) {
       <button 
         type="submit" 
         disabled={isSubmitting}
-        className="w-full bg-primary text-background py-3 font-medium rounded-sm hover:bg-primary-light transition-colors disabled:opacity-70 shadow-sm"
+        className="w-full bg-primary text-background py-3 font-medium rounded-md hover:bg-primary-light transition-colors disabled:opacity-70 shadow-sm cursor-pointer disabled:cursor-not-allowed"
       >
         {isSubmitting ? "Submitting..." : "Submit Registration"}
       </button>

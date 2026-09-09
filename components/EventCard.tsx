@@ -40,10 +40,10 @@ export default function EventCard({ event }: { event: any }) {
         
         <Link 
           href={`/events/${event._id}`}
-          className={`w-full py-2.5 rounded-sm text-center font-medium transition-colors ${
+          className={`w-full py-2.5 rounded-md text-center font-medium transition-colors ${
             isPast 
-              ? "bg-accent text-foreground/50 pointer-events-none" 
-              : "bg-primary text-background hover:bg-primary-light shadow-sm"
+              ? "bg-accent text-foreground/50 pointer-events-none cursor-default" 
+              : "bg-primary text-background hover:bg-primary-light shadow-sm cursor-pointer"
           }`}
           aria-disabled={isPast}
         >

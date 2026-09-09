@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
           </a>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="text-sm px-4 py-1.5 border border-secondary-light/40 rounded-sm hover:bg-primary-light transition-colors"
+            className="text-sm px-4 py-1.5 border border-secondary-light/40 rounded-md hover:bg-primary-light transition-colors cursor-pointer"
           >
             Sign Out
           </button>
@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-accent rounded-sm text-sm focus:outline-none focus:border-primary bg-background"
+            className="px-3 py-2 border border-accent rounded-md text-sm focus:outline-none focus:border-primary bg-background cursor-pointer"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
           <select
             value={filterEvent}
             onChange={(e) => setFilterEvent(e.target.value)}
-            className="px-3 py-2 border border-accent rounded-sm text-sm focus:outline-none focus:border-primary bg-background"
+            className="px-3 py-2 border border-accent rounded-md text-sm focus:outline-none focus:border-primary bg-background cursor-pointer"
           >
             <option value="">All Events</option>
             {events.map((ev) => (
@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => { setFilterStatus(""); setFilterEvent(""); }}
-            className="px-4 py-2 text-sm text-primary border border-primary/30 rounded-sm hover:bg-primary/5 transition-colors"
+            className="px-4 py-2 text-sm text-primary border border-primary/30 rounded-md hover:bg-primary/5 transition-colors cursor-pointer"
           >
             Clear Filters
           </button>
