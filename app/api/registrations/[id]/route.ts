@@ -3,48 +3,18 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import connectDB from "@/lib/db";
 import { Registration } from "@/models/Registration";
+import { Event } from "@/models/Event";
 import { UTApi } from "uploadthing/server";
-import nodemailer from "nodemailer";
+import {
+  buildVerifiedTicketEmailHtml,
+  buildRejectionEmailHtml,
+  sendMail,
+} from "@/lib/email";
+
+// Ensure Event model is registered in Mongoose
+void Event;
 
 const utapi = new UTApi();
-
-async function sendVerificationEmail(to: string, name: string, status: "verified" | "rejected", reason?: string) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  const subject =
-    status === "verified"
-      ? "Your Créer Club Registration is Confirmed! 🎨"
-      : "Update on Your Créer Club Registration";
-
-  const html =
-    status === "verified"
-      ? `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;background:#FDFBF7;border-radius:12px;">
-           <h2 style="color:#800000;font-size:24px;margin-bottom:8px;">Hello ${name}! 🎨</h2>
-           <p style="color:#3E2723;">Your registration for the Créer Club workshop has been <strong>verified</strong>. We can't wait to see you!</p>
-           <p style="color:#3E2723;">Please arrive a few minutes early. See you at the workshop!</p>
-           <p style="color:#888;font-size:13px;margin-top:24px;">— Créer Club Team</p>
-         </div>`
-      : `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;background:#FDFBF7;border-radius:12px;">
-           <h2 style="color:#800000;font-size:24px;margin-bottom:8px;">Hello ${name},</h2>
-           <p style="color:#3E2723;">Unfortunately, we were unable to verify your registration.</p>
-           ${reason ? `<p style="color:#3E2723;"><strong>Reason:</strong> ${reason}</p>` : ""}
-           <p style="color:#3E2723;">Please reach out to us on Instagram if you have any questions.</p>
-           <p style="color:#888;font-size:13px;margin-top:24px;">— Créer Club Team</p>
-         </div>`;
-
-  await transporter.sendMail({
-    from: `"Créer Club" <${process.env.GMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
-}
 
 export async function PATCH(
   req: Request,
@@ -65,11 +35,27 @@ export async function PATCH(
     }
 
     await connectDB();
-    const registration = await Registration.findById(id);
+
+    // Populate event so we can include details in the email
+    const registration = await Registration.findById(id).populate<{
+      eventId: { title: string; date: Date; venue: string };
+    }>("eventId", "title date venue");
 
     if (!registration) {
       return NextResponse.json({ error: "Registration not found" }, { status: 404 });
     }
+
+    const event = registration.eventId as { title: string; date: Date; venue: string } | undefined;
+    const eventTitle = event?.title ?? "Créer Club Workshop";
+    const eventDate = event?.date
+      ? new Date(event.date).toLocaleDateString("en-IN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "Upcoming Date";
+    const venue = event?.venue ?? "Venue details will be shared";
 
     if (action === "approve") {
       // Delete screenshot from UploadThing after approval
@@ -82,19 +68,38 @@ export async function PATCH(
       registration.screenshotKey = undefined as any;
       await registration.save();
 
-      // Send confirmation email (non-blocking)
-      sendVerificationEmail(registration.email, registration.name, "verified").catch(
-        (err) => console.error("Email send error:", err)
-      );
+      // Send Payment Verified Ticket Email (non-blocking)
+      const ticketHtml = buildVerifiedTicketEmailHtml({
+        name: registration.name,
+        eventTitle,
+        eventDate,
+        venue,
+        registrationId: String(registration._id),
+        transactionId: registration.transactionId,
+      });
+
+      sendMail(
+        registration.email,
+        `Payment Verified — You're In! 🎟️ | ${eventTitle}`,
+        ticketHtml
+      ).catch((err) => console.error("Ticket email send error:", err));
     } else {
       registration.status = "rejected";
       registration.rejectionReason = rejectionReason || null;
       await registration.save();
 
       // Send rejection email (non-blocking)
-      sendVerificationEmail(registration.email, registration.name, "rejected", rejectionReason).catch(
-        (err) => console.error("Email send error:", err)
-      );
+      const rejectionHtml = buildRejectionEmailHtml({
+        name: registration.name,
+        eventTitle,
+        reason: rejectionReason,
+      });
+
+      sendMail(
+        registration.email,
+        `Registration Update — ${eventTitle} | Créer Club`,
+        rejectionHtml
+      ).catch((err) => console.error("Rejection email send error:", err));
     }
 
     return NextResponse.json({ success: true, status: registration.status });

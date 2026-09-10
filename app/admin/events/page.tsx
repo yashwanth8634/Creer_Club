@@ -307,7 +307,7 @@ export default function AdminEventsPage() {
                       <UploadButton
                         endpoint="imageUploader"
                         onClientUploadComplete={(res) => {
-                          if (res?.[0]) setForm({ ...form, coverImage: res[0].url });
+                          if (res?.[0]) setForm({ ...form, coverImage: (res[0] as any).ufsUrl || res[0].url });
                         }}
                         onUploadError={(err) => setError(err.message)}
                       />
@@ -337,7 +337,7 @@ export default function AdminEventsPage() {
                       <UploadButton
                         endpoint="imageUploader"
                         onClientUploadComplete={(res) => {
-                          if (res?.[0]) setForm({ ...form, upiQrCode: res[0].url });
+                          if (res?.[0]) setForm({ ...form, upiQrCode: (res[0] as any).ufsUrl || res[0].url });
                         }}
                         onUploadError={(err) => setError(err.message)}
                       />
@@ -378,7 +378,7 @@ export default function AdminEventsPage() {
                       endpoint="imageUploader"
                       onClientUploadComplete={(res) => {
                         if (res?.length) {
-                          const newImgs = res.map((f) => ({ url: f.url, key: f.key }));
+                          const newImgs = res.map((f: any) => ({ url: f.ufsUrl || f.url, key: f.key }));
                           setGalleryImages((prev) => [...prev, ...newImgs]);
                         }
                       }}
@@ -425,52 +425,65 @@ export default function AdminEventsPage() {
             {events.map((ev) => {
               const isPast = DateTime.fromISO(ev.registrationEndDate) <= DateTime.now();
               return (
-                <div key={ev._id} className="bg-white rounded-xl border border-accent/30 shadow-sm p-5 flex items-center gap-5">
-                  {ev.coverImage ? (
-                    <img
-                      src={ev.coverImage}
-                      alt={ev.title}
-                      className="w-20 h-20 rounded-lg object-cover shrink-0 border border-accent/30"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-lg shrink-0 border border-accent/30 bg-accent/20 flex items-center justify-center text-primary/30 text-xs font-serif">
-                      No cover
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-serif font-bold text-primary text-lg truncate">{ev.title}</h3>
+                <div key={ev._id} className="bg-white rounded-xl border border-accent/30 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Cover image */}
+                  <div className="flex items-start gap-4 sm:contents">
+                    {ev.coverImage ? (
+                      <img
+                        src={ev.coverImage}
+                        alt={ev.title}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover shrink-0 border border-accent/30"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg shrink-0 border border-accent/30 bg-accent/20 flex items-center justify-center text-primary/30 text-xs font-serif">
+                        No cover
+                      </div>
+                    )}
+
+                    {/* Event info */}
+                    <div className="flex-1 min-w-0">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+                        className={`inline-block text-xs px-2 py-0.5 rounded-full font-semibold mb-1 ${
                           isPast ? "bg-accent text-foreground/50" : "bg-primary/10 text-primary"
                         }`}
                       >
                         {isPast ? "Past" : "Upcoming"}
                       </span>
-                    </div>
-                    <p className="text-sm text-foreground/60">
-                      {DateTime.fromISO(ev.date).toFormat("ccc, LLL d yyyy, h:mm a")} · {ev.venue} · ₹{ev.fee}
-                    </p>
-                    <p className="text-xs text-foreground/40 mt-0.5">
-                      Reg. closes: {DateTime.fromISO(ev.registrationEndDate).toFormat("LLL d, h:mm a")}
-                      {ev.galleryImages?.length > 0 && (
-                        <span className="ml-3 text-primary/60">
-                          {ev.galleryImages.length} gallery photo{ev.galleryImages.length !== 1 ? "s" : ""}
+                      <h3 className="font-serif font-bold text-primary text-base sm:text-lg leading-snug break-words">
+                        {ev.title}
+                      </h3>
+                      <p className="text-sm text-foreground/60 mt-0.5">
+                        <span className="whitespace-nowrap">{DateTime.fromISO(ev.date).toFormat("ccc, LLL d yyyy, h:mm a")}</span>
+                        {" · "}
+                        <span>{ev.venue}</span>
+                        {" · "}
+                        <span className="whitespace-nowrap">₹{ev.fee}</span>
+                      </p>
+                      <p className="text-xs text-foreground/40 mt-0.5">
+                        <span className="whitespace-nowrap">
+                          Reg. closes: {DateTime.fromISO(ev.registrationEndDate).toFormat("LLL d, h:mm a")}
                         </span>
-                      )}
-                    </p>
+                        {ev.galleryImages?.length > 0 && (
+                          <span className="ml-2 text-primary/60 whitespace-nowrap">
+                            · {ev.galleryImages.length} gallery photo{ev.galleryImages.length !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2 shrink-0 sm:ml-auto">
                     <button
                       onClick={() => openEdit(ev)}
-                      className="px-4 py-2 text-sm border border-accent text-foreground rounded-md hover:bg-accent/30 transition-colors cursor-pointer"
+                      className="flex-1 sm:flex-none px-4 py-2 text-sm border border-accent text-foreground rounded-md hover:bg-accent/30 transition-colors cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(ev._id)}
                       disabled={isDeleting === ev._id}
-                      className="px-4 py-2 text-sm bg-red-50 border border-red-200 text-red-600 rounded-md hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="flex-1 sm:flex-none px-4 py-2 text-sm bg-red-50 border border-red-200 text-red-600 rounded-md hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isDeleting === ev._id && <Spinner size={13} />}
                       Delete

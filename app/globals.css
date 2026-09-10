@@ -9,6 +9,9 @@
   --color-background: #FDFBF7;
   --color-foreground: #3E2723;
   --color-accent: #E8DCC4;
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-script: var(--font-dancing-script), cursive;
+  --font-hand: var(--font-caveat), cursive;
 }
 
 @layer base {

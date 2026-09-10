@@ -212,8 +212,9 @@ export default function RegistrationForm({
                 endpoint="imageUploader"
                 onClientUploadComplete={(res) => {
                   if (res && res[0]) {
-                    setScreenshotUrl(res[0].url);
-                    setScreenshotKey(res[0].key);
+                    const file = res[0] as { url?: string; ufsUrl?: string; key: string };
+                    setScreenshotUrl(file.ufsUrl || file.url || "");
+                    setScreenshotKey(file.key);
                     setError("");
                   }
                 }}

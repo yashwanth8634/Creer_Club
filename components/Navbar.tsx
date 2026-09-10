@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { CalendarDays } from "lucide-react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,9 +36,14 @@ export default function Navbar() {
               priority
             />
           </div>
-          <span className="text-xl sm:text-2xl font-serif italic font-bold text-primary tracking-wide">
-            Créer Club
-          </span>
+          <div className="flex flex-col -gap-0.5">
+            <span className="text-xl sm:text-2xl font-serif italic font-bold text-primary tracking-wide leading-tight">
+              Créer Club
+            </span>
+            <span className="text-[8px] tracking-[0.18em] uppercase text-foreground/40 font-sans leading-none hidden sm:block">
+              Paint • Create • Connect
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
@@ -60,8 +66,9 @@ export default function Navbar() {
           })}
           <Link
             href="/#events"
-            className="bg-primary text-background px-4 py-1.5 rounded-full text-xs font-sans not-italic font-medium hover:bg-primary-light active:scale-95 transition-all duration-200 shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-primary text-background px-4 py-1.5 rounded-full text-xs font-sans not-italic font-medium hover:bg-primary-light active:scale-95 transition-all duration-200 shadow-xs"
           >
+            <CalendarDays className="w-3 h-3" />
             Book Seat
           </Link>
         </div>

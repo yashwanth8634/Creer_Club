@@ -3,8 +3,7 @@ import connectDB from "@/lib/db";
 import { Registration } from "@/models/Registration";
 import { Event } from "@/models/Event";
 import mongoose from "mongoose";
-
-// Basic rate limiting could be added here (e.g., using Upstash Redis or a simple in-memory store)
+import { buildPendingEmailHtml, sendMail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     await connectDB();
-    
+
     // Check if event exists and is not past registration date
     const event = await Event.findById(eventId);
     if (!event) {
@@ -44,6 +43,30 @@ export async function POST(req: Request) {
     });
 
     await registration.save();
+
+    // Format event date for email
+    const eventDate = new Date(event.date).toLocaleDateString("en-IN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Send pending confirmation email (non-blocking)
+    const pendingHtml = buildPendingEmailHtml({
+      name,
+      eventTitle: event.title,
+      eventDate,
+      venue: event.venue,
+      transactionId,
+      registrationId: String(registration._id),
+    });
+
+    sendMail(
+      email,
+      `Registration Received (Pending Verification) — ${event.title} | Créer Club`,
+      pendingHtml
+    ).catch((err) => console.error("Pending email send error:", err));
 
     return NextResponse.json({ success: true, registrationId: registration._id }, { status: 201 });
   } catch (error: any) {
