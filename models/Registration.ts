@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import "./Event";
 
 export interface IRegistration extends Document {
   eventId: mongoose.Types.ObjectId;

@@ -16,6 +16,15 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Créer Club | Art Workshops",
   description: "A cozy place for art and painting workshops.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon.png" },
+    ],
+    shortcut: ["/favicon.png"],
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >

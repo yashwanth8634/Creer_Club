@@ -3,6 +3,10 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import connectDB from "@/lib/db";
 import { Registration } from "@/models/Registration";
+import { Event } from "@/models/Event";
+
+// Ensure Event model is loaded into mongoose
+void Event;
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -28,6 +32,7 @@ export async function GET(req: Request) {
     return NextResponse.json(registrations);
   } catch (error) {
     console.error("GET /api/registrations error:", error);
-    return NextResponse.json({ error: "Failed to fetch registrations" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to fetch registrations";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

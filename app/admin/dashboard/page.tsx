@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import AdminRegistrationRow from "@/components/AdminRegistrationRow";
+import Link from "next/link";
 import { signOut } from "next-auth/react";
+import AdminRegistrationRow from "@/components/AdminRegistrationRow";
 
 interface Registration {
   _id: string;
@@ -20,44 +21,65 @@ interface Registration {
 export default function AdminDashboardPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState("");
   const [filterEvent, setFilterEvent] = useState("");
 
-  const fetchRegistrations = useCallback(async () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refetch = useCallback(() => {
     setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filterStatus) params.set("status", filterStatus);
-      if (filterEvent) params.set("eventId", filterEvent);
-
-      const res = await fetch(`/api/registrations?${params.toString()}`);
-      
-      if (!res.ok) {
-        console.error("Failed to fetch registrations:", res.status, res.statusText);
-        setRegistrations([]);
-        setIsLoading(false);
-        return;
-      }
-
-      const data = await res.json();
-      
-      if (Array.isArray(data)) {
-        setRegistrations(data);
-      } else {
-        console.error("Expected array but got:", data);
-        setRegistrations([]);
-      }
-    } catch (error) {
-      console.error("Error fetching registrations:", error);
-      setRegistrations([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filterStatus, filterEvent]);
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
-    fetchRegistrations();
-  }, [fetchRegistrations]);
+    let ignore = false;
+
+    async function fetchData() {
+      try {
+        const params = new URLSearchParams();
+        if (filterStatus) params.set("status", filterStatus);
+        if (filterEvent) params.set("eventId", filterEvent);
+
+        const res = await fetch(`/api/registrations?${params.toString()}`);
+
+        if (!res.ok) {
+          if (!ignore) {
+            setError(`Error ${res.status}: Failed to load data.`);
+            setRegistrations([]);
+          }
+          return;
+        }
+
+        const data = await res.json();
+        if (!ignore) {
+          if (Array.isArray(data)) {
+            setRegistrations(data);
+            setError(null);
+          } else {
+            setError("Invalid data format received from server.");
+            setRegistrations([]);
+          }
+        }
+      } catch (err) {
+        if (!ignore) {
+          console.error("Error fetching registrations:", err);
+          setError("Network error or failed to parse response.");
+          setRegistrations([]);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [filterStatus, filterEvent, refreshKey]);
 
   // Get unique events for filter dropdown
   const events = Array.from(
@@ -84,9 +106,9 @@ export default function AdminDashboardPage() {
           <p className="text-xs text-secondary-light opacity-80">Dashboard</p>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/admin/events" className="text-sm text-secondary-light hover:text-secondary transition-colors">
+          <Link href="/admin/events" className="text-sm text-secondary-light hover:text-secondary transition-colors">
             Manage Events
-          </a>
+          </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
             className="text-sm px-4 py-1.5 border border-secondary-light/40 rounded-md hover:bg-primary-light transition-colors cursor-pointer"
@@ -116,7 +138,10 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-xl border border-accent/30 shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center">
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => {
+              setIsLoading(true);
+              setFilterStatus(e.target.value);
+            }}
             className="px-3 py-2 border border-accent rounded-md text-sm focus:outline-none focus:border-primary bg-background cursor-pointer"
           >
             <option value="">All Statuses</option>
@@ -127,7 +152,10 @@ export default function AdminDashboardPage() {
 
           <select
             value={filterEvent}
-            onChange={(e) => setFilterEvent(e.target.value)}
+            onChange={(e) => {
+              setIsLoading(true);
+              setFilterEvent(e.target.value);
+            }}
             className="px-3 py-2 border border-accent rounded-md text-sm focus:outline-none focus:border-primary bg-background cursor-pointer"
           >
             <option value="">All Events</option>
@@ -137,19 +165,33 @@ export default function AdminDashboardPage() {
           </select>
 
           <button
-            onClick={() => { setFilterStatus(""); setFilterEvent(""); }}
+            onClick={() => {
+              setIsLoading(true);
+              setFilterStatus("");
+              setFilterEvent("");
+            }}
             className="px-4 py-2 text-sm text-primary border border-primary/30 rounded-md hover:bg-primary/5 transition-colors cursor-pointer"
           >
             Clear Filters
           </button>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center justify-between">
+            <p>{error}</p>
+            <button onClick={refetch} className="text-sm underline hover:text-red-800">Retry</button>
+          </div>
+        )}
+
         {/* Registrations Table */}
         <div className="bg-white rounded-xl border border-accent/30 shadow-sm overflow-x-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-20 text-foreground/40">Loading…</div>
           ) : registrations.length === 0 ? (
-            <div className="flex items-center justify-center py-20 text-foreground/40">No registrations found.</div>
+            <div className="flex items-center justify-center py-20 text-foreground/40">
+              {error ? "Could not load registrations." : "No registrations found."}
+            </div>
           ) : (
             <table className="w-full text-sm min-w-[900px]">
               <thead>
@@ -166,7 +208,7 @@ export default function AdminDashboardPage() {
               </thead>
               <tbody>
                 {registrations.map((reg) => (
-                  <AdminRegistrationRow key={reg._id} reg={reg} onUpdate={fetchRegistrations} />
+                  <AdminRegistrationRow key={reg._id} reg={reg} onUpdate={refetch} />
                 ))}
               </tbody>
             </table>
