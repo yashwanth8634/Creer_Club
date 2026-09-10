@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { title, description, date, registrationEndDate, venue, fee, coverImage } = body;
+    const { title, description, date, registrationEndDate, venue, fee, coverImage, upiQrCode, galleryImages } = body;
 
     if (!title || !description || !date || !registrationEndDate || !venue || fee == null) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
@@ -43,7 +43,8 @@ export async function POST(req: Request) {
       venue,
       fee: Number(fee),
       coverImage,
-      galleryImages: [],
+      upiQrCode,
+      galleryImages: galleryImages || [],
       status: new Date(date) > new Date() ? "upcoming" : "past",
     });
 

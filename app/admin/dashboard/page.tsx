@@ -25,14 +25,34 @@ export default function AdminDashboardPage() {
 
   const fetchRegistrations = useCallback(async () => {
     setIsLoading(true);
-    const params = new URLSearchParams();
-    if (filterStatus) params.set("status", filterStatus);
-    if (filterEvent) params.set("eventId", filterEvent);
+    try {
+      const params = new URLSearchParams();
+      if (filterStatus) params.set("status", filterStatus);
+      if (filterEvent) params.set("eventId", filterEvent);
 
-    const res = await fetch(`/api/registrations?${params.toString()}`);
-    const data = await res.json();
-    setRegistrations(data);
-    setIsLoading(false);
+      const res = await fetch(`/api/registrations?${params.toString()}`);
+      
+      if (!res.ok) {
+        console.error("Failed to fetch registrations:", res.status, res.statusText);
+        setRegistrations([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      
+      if (Array.isArray(data)) {
+        setRegistrations(data);
+      } else {
+        console.error("Expected array but got:", data);
+        setRegistrations([]);
+      }
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+      setRegistrations([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [filterStatus, filterEvent]);
 
   useEffect(() => {
